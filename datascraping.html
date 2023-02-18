@@ -1,0 +1,204 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Cineb project - Data Analyst Portfolio</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+		<link rel=”stylesheet” href=”default.min.css” />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a href="index.html" class="logo">Data Analyst Portfolio</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Homepage</a></li>
+							<li><a href="myskills.html">My skills</a></li>
+							<li class="active"><a href="datascraping.html">Data scraping</a></li>
+							<li><a href="sqlexamples.html">SQL examples</a></li>
+							<li><a href="contactme.html">Contact</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="#" class="icon brands fa-twitter"><span class="label">Twitter</span></a></li>
+							<li><a href="#" class="icon brands fa-facebook-f"><span class="label">Facebook</span></a></li>
+							<li><a href="#" class="icon brands fa-instagram"><span class="label">Instagram</span></a></li>
+							<li><a href="#" class="icon brands fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<h1>Scraping data from Cineb</h1>
+									<p>On this page, I am showcasing craping data from Cineb.net.</p>
+								</header>
+								<div class="image main"><img src="pics/data-scraping.jpg" alt="" /></div>
+								<p>Skills used: Python, SQL,...</p>
+
+
+								<h2>Python code</h2>
+								<p>First I wrote this python code to scrape some data from the cineb.net homepage which I saved into an Excel file.</p>
+
+								<pre><code class="language-python">from bs4 import BeautifulSoup
+import requests, openpyxl
+									
+excel = openpyxl.Workbook()
+print(excel.sheetnames)
+sheet = excel.active
+sheet.title = 'Top Rated Movies on CSFD.cz'
+print(excel.sheetnames)
+sheet.append(['Section', 'Media Type', 'Media Title', 'Year of Release', 'Length', 'Quality', 'Season', 'Episode' ])
+
+try:
+    source = requests.get('https://cineb.net/')
+    source.raise_for_status
+
+    soup = BeautifulSoup(source.text, 'html.parser')
+
+    # first we want the movies in the featured
+    movies = soup.find('ul', class_="film-list-ul").find_all('li')
+    section = 'Featured'
+    mediatype = 'Movie'
+    episode = ''
+    season = ''
+    print('Section: ' + section)
+
+    for movie in movies:
+        name = movie.find('h3', class_="film-name").a.text
+        mytext = movie.find('div', class_="fd-infor").text
+        mysplit = mytext.split('\n')
+        quality = mysplit[1]
+        year = mysplit[2]
+        length = mysplit[4]
+        print('Movie: ' + name + "[" + quality + "] " + year + ' ' + length)
+        sheet.append([section, mediatype, name, year, length, quality, season, episode])
+
+    moviesCount = len(movies)
+    print(f'Featured movies: {moviesCount}')
+
+    # now we want the movies in the trending section
+    movies = soup.find(id="trending-movies").find_all('div', class_="flw-item")
+    section = 'Trending'
+    mediatype = 'Movie'
+    print('Section: ' + section)
+
+    for movie in movies:
+        name = movie.find('h3', class_="film-name").a.text
+        mytext = movie.find('div', class_="fd-infor").text
+        mysplit = mytext.split('\n')
+        quality = mysplit[1]
+        year = mysplit[2]
+        length = mysplit[4]
+        print('Movie: ' + name + "[" + quality + "] " + year + ' ' + length)
+        sheet.append([section, mediatype, name, year, length, quality, season, episode])
+
+    moviesCount = len(movies)
+    print(f'Trending movies: {moviesCount}')
+
+    # now we want the series in the trending section
+    movies = soup.find(id="trending-tv").find_all('div', class_="flw-item")
+    section = 'Trending'
+    mediatype = 'Series'
+    print('Section: ' + section)
+    year = ''
+    length = ''
+
+    for movie in movies:
+        name = movie.find('h3', class_="film-name").a.text
+        mytext = movie.find('div', class_="fd-infor").text
+        mysplit = mytext.split('\n')
+        quality = mysplit[1]
+        season = mysplit[2]
+        episode = mysplit[4]
+        print('Series: ' + name + "[" + quality + "] " + season + ' ' + episode)
+        sheet.append([section, mediatype, name, year, length, quality, season, episode])
+
+    moviesCount = len(movies)
+    print(f'Trending series: {moviesCount}')
+
+except Exception as e:
+    print(e)
+
+
+excel.save('Cineb Movies.xlsx')
+</code></pre>
+
+								<h2>Excel file</h2>
+								<p>This is the contents of the Excel file:</p>
+								<iframe width="100%" height="300px" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSkJBJZGx9xTJKzGKre8Bj8Gt0XCQGRHO2YAilamw6OmIKE7FvMbdPLhZIJaR00PQ/pubhtml?gid=406875704&amp;single=true&amp;widget=true&amp;headers=false">
+
+								</iframe>
+
+								<h2>MySQL database</h2>
+								<p>Then I created a MySQL database and imported the cineb data... Some SQL statements here...</p>
+									<pre><code>SELECT AVG(life_expectancy) as 'life expectancy', 
+  continent, location, MAX(date)
+FROM covidbase.tblcovidvaccinations
+where continent = 'asia' or continent = 'africa'
+group by continent, location
+order by continent, location;
+									</code></pre>
+
+								<h3> Total Cases vs Total Deaths</h3>
+								<p>Shows likelihood of dying if you contract covid in your country</p>
+
+								<pre><code>Select Location, date, total_cases,total_deaths, 
+(total_deaths/total_cases)*100 as DeathPercentage
+From covidbase.tblcoviddeaths
+Where location like '%states%'
+and continent is not null 
+order by 1,2;</code></pre>
+
+								<div class="image" style="margin-bottom: 2em;">Results of the statement:<img src="pics/data-grid2.jpg" alt="Data grid"></div>
+
+								<h3>BREAKING THINGS DOWN BY CONTINENT</h3>
+
+								<p>Showing contintents with the highest death count per population:</p>
+
+								<pre><code>SELECT continent, MAX(total_deaths) as TotalDeathCount
+FROM covidbase.tblcoviddeaths
+WHERE continent is not null 
+GROUP BY continent
+ORDER BY TotalDeathCount desc;</code></pre>
+
+<div class="image" style="margin-bottom: 2em;">Results of the statement:<img src="pics/data-grid3.jpg" alt="Data grid"></div>
+
+								</div>
+							
+							</section>
+
+					</div>
+
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>&copy; Data Analyst 2023</li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="highlight.min.js"></script>
+			<script>hljs.highlightAll();</script>
+	</body>
+</html>
