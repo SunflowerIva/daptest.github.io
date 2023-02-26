@@ -23,9 +23,9 @@
 					<nav id="nav">
 						<ul class="links">
 							<li><a href="index.html">Homepage</a></li>
-							<li><a href="myskills.html">My skills</a></li>
+							<li><a href="inflation.html">Inflation project</a></li>
 							<li class="active"><a href="datascraping.html">Data scraping</a></li>
-							<li><a href="sqlexamples.html">SQL examples</a></li>
+							<li><a href="datacleaning.html">Data cleaning</a></li>
 							<li><a href="contactme.html">Contact</a></li>
 						</ul>
 						<ul class="icons">
@@ -42,15 +42,14 @@
 						<!-- Post -->
 							<section class="post">
 								<header class="major">
-									<h1>Scraping data from Cineb</h1>
-									<p>On this page, I am showcasing craping data from Cineb.net.</p>
+									<h1>Data scraping</h1>
 								</header>
-								<div class="image main"><img src="pics/data-scraping.jpg" alt="" /></div>
-								<p>Skills used: Python, SQL,...</p>
 
+								<h2>Cineb.net scraping</h2>
+								<p>The data scraped in this section are from the website cineb.net, from which I created a data set of movies and TV series.</p>
+								<p>As shown below, I have created an excel file with contents of said data in it.</p>
 
-								<h2>Python code</h2>
-								<p>First I wrote this python code to scrape some data from the cineb.net homepage which I saved into an Excel file.</p>
+								<h3>Python code</h3>
 
 								<pre><code class="language-python">from bs4 import BeautifulSoup
 import requests, openpyxl
@@ -136,45 +135,64 @@ except Exception as e:
 excel.save('Cineb Movies.xlsx')
 </code></pre>
 
-								<h2>Excel file</h2>
-								<p>This is the contents of the Excel file:</p>
-								<iframe width="100%" height="300px" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSkJBJZGx9xTJKzGKre8Bj8Gt0XCQGRHO2YAilamw6OmIKE7FvMbdPLhZIJaR00PQ/pubhtml?gid=406875704&amp;single=true&amp;widget=true&amp;headers=false">
+								<h3>Excel file</h3>
+								<p>This is the contents of the Excel file with the scraped data:</p>
+								<iframe width="100%" height="400px" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSkJBJZGx9xTJKzGKre8Bj8Gt0XCQGRHO2YAilamw6OmIKE7FvMbdPLhZIJaR00PQ/pubhtml?widget=true&amp;headers=false"></iframe>
 
-								</iframe>
+								<hr />
 
-								<h2>MySQL database</h2>
-								<p>Then I created a MySQL database and imported the cineb data... Some SQL statements here...</p>
-									<pre><code>SELECT AVG(life_expectancy) as 'life expectancy', 
-  continent, location, MAX(date)
-FROM covidbase.tblcovidvaccinations
-where continent = 'asia' or continent = 'africa'
-group by continent, location
-order by continent, location;
-									</code></pre>
+								<h2>Timejobs.com scraping</h2>
 
-								<h3> Total Cases vs Total Deaths</h3>
-								<p>Shows likelihood of dying if you contract covid in your country</p>
+								<p>In this section we are looking at scraped data from <a href="https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords=Java+%2C+Python&txtLocation=" target="_blank">timejobs.com</a></p>
+								<p>In this code, we are looking for jobs which require python skills and also the ability to exclude skills in which the user might not be proficient in. I have also set a timer in which, if there's case of new job posting python in them, it refreshes every hour and includes said jobs.</p>
+								
+								<h3>Python code</h3>
 
-								<pre><code>Select Location, date, total_cases,total_deaths, 
-(total_deaths/total_cases)*100 as DeathPercentage
-From covidbase.tblcoviddeaths
-Where location like '%states%'
-and continent is not null 
-order by 1,2;</code></pre>
+								<pre><code>
+# in this code, I am trying to find job application with the serach of 'python' 
+from bs4 import BeautifulSoup
+import requests
+import time
+	
+# here I am trying to find skills that I am not familiar with so that i can rule them out
+print('Put some skill that you  not are familiar with')
+unfamliar_skill = input('>')
+print(f'Filtering out {unfamliar_skill}')
+	
+# In this segment, I am looking for jobs on this website 
+def find_jobs():
+	html_text = requests.get('https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords=Java+%2C+Python&txtLocation=').text
+	soup = BeautifulSoup(html_text, 'lxml')
+	jobs = soup.find_all('li', class_ = "clearfix job-bx wht-shd-bx")
+	
+	for job in jobs:
+		posted_date = job.find('span', class_ = 'sim-posted').span.text
+# in this portion of the code, I am trying to find job within a few days and not everything so the files i get back aren't too huge
+		if 'few' in posted_date:
+			company_name = job.find('h3', class_ = 'joblist-comp-name').text.replace(' ','') 
+			skills = job.find('span', class_ = 'srp-skills').text.replace(' ','') 
+			more_info = job.header.h2.a['href']
+# And here again I am trying to rule out skills I dont know from the job search           
+			if unfamliar_skill not in skills:
+				posted_date = job.find('span', class_ = 'sim-posted').span.text
+	
+				print(f"Company Name: {company_name.strip()}")
+				print(f"Required Skills: {skills.strip()}")
+				print(f"More Info: {more_info}") 
+	
+				print('')
+# the time i want this  program running 
+if __name__ == '__main__':
+	while True:
+		find_jobs()
+		time_wait = 10
+		print(f'waiting {time_wait} minutes...')
+		time.sleep(time_wait * 60)
+	
+</code></pre>
 
-								<div class="image" style="margin-bottom: 2em;">Results of the statement:<img src="pics/data-grid2.jpg" alt="Data grid"></div>
+<div class="image" style="margin-bottom: 2em;">Results of running the code:<img class="image fit" src="pics/scraper2b.png" alt="Data grid"></div>
 
-								<h3>BREAKING THINGS DOWN BY CONTINENT</h3>
-
-								<p>Showing contintents with the highest death count per population:</p>
-
-								<pre><code>SELECT continent, MAX(total_deaths) as TotalDeathCount
-FROM covidbase.tblcoviddeaths
-WHERE continent is not null 
-GROUP BY continent
-ORDER BY TotalDeathCount desc;</code></pre>
-
-<div class="image" style="margin-bottom: 2em;">Results of the statement:<img src="pics/data-grid3.jpg" alt="Data grid"></div>
 
 								</div>
 							
